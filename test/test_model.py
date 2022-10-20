@@ -240,8 +240,7 @@ class CmdStanModelTest(CustomTestCase):
 
             # Compile after modifying included file, ensuring cache is not used.
             def _patched_getmtime(filename: str) -> float:
-                includes = ['divide_real_by_two.stan', 'add_one_function.stan']
-                if any(filename.endswith(include) for include in includes):
+                if filename.endswith(".stan") and filename != stan_file:
                     return float('inf')
                 return getmtime(filename)
 
