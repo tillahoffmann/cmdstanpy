@@ -103,88 +103,31 @@ def test_good() -> None:
     assert 'algorithm=hmc engine=nuts' not in ' '.join(cmd)
 
 
-def test_bad() -> None:
-    args = SamplerArgs(iter_warmup=-10)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(iter_warmup=10, adapt_engaged=False)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(iter_sampling=-10)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(thin=-10)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(max_treedepth=-10)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(step_size=-10)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(step_size=[1.0, 1.1])
-    with pytest.raises(ValueError):
-        args.validate(chains=1)
-
-    args = SamplerArgs(step_size=[1.0, -1.1])
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(adapt_delta=1.1)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(adapt_delta=-0.1)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(max_treedepth=12, fixed_param=True)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(metric='dense', fixed_param=True)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(step_size=0.5, fixed_param=True)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(adapt_delta=0.88, adapt_engaged=False)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(adapt_init_phase=0.88)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(adapt_metric_window=0.88)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(adapt_step_size=0.88)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(adapt_init_phase=-1)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(adapt_metric_window=-2)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(adapt_step_size=-3)
-    with pytest.raises(ValueError):
-        args.validate(chains=2)
-
-    args = SamplerArgs(adapt_delta=0.88, fixed_param=True)
+@pytest.mark.parametrize("kwargs", [
+    {"iter_warmup": -10},
+    {"iter_warmup": 10, "adapt_engaged": False},
+    {"iter_sampling": -10},
+    {"thin": -10},
+    {"max_treedepth": -10},
+    {"step_size": -10},
+    {"step_size": [1.0, 1.1, 1.2]},
+    {"step_size": [1.0, -1.1]},
+    {"adapt_delta": 1.1},
+    {"adapt_delta": -0.1},
+    {"max_treedepth": 12, "fixed_param": True},
+    {"metric": "dense", "fixed_param": True},
+    {"step_size": 0.5, "fixed_param": True},
+    {"adapt_delta": 0.88, "adapt_engaged": False},
+    {"adapt_init_phase": 0.88},
+    {"adapt_metric_window": 0.88},
+    {"adapt_step_size": 0.88},
+    {"adapt_init_phase": -1},
+    {"adapt_metric_window": -2},
+    {"adapt_step_size": -3},
+    {"adapt_delta": 0.88, "fixed_param": True},
+])
+def test_bad(kwargs: dict) -> None:
+    args = SamplerArgs(**kwargs)
     with pytest.raises(ValueError):
         args.validate(chains=2)
 
