@@ -2,7 +2,6 @@
 
 import os
 import re
-from typing import List
 
 import setuptools
 
@@ -13,24 +12,6 @@ def readme_contents() -> str:
     with open(os.path.join(HERE, 'README.md'), 'r') as fd:
         src = fd.read()
     return src
-
-
-def requirements() -> List[str]:
-    with open(os.path.join(HERE, 'requirements.txt'), 'r') as fd:
-        src = fd.read()
-    return src.splitlines()
-
-
-def requirements_test() -> List[str]:
-    with open(os.path.join(HERE, 'requirements-test.txt'), 'r') as fd:
-        src = fd.read()
-    return src.splitlines()
-
-
-def requirements_optional() -> List[str]:
-    with open(os.path.join(HERE, 'requirements-optional.txt'), 'r') as fd:
-        src = fd.read()
-    return src.splitlines()
 
 
 def get_version() -> str:
@@ -49,20 +30,6 @@ Natural Language :: English
 Programming Language :: Python
 Topic :: Scientific/Engineering :: Information Analysis
 """
-
-INSTALL_REQUIRES = requirements()
-
-EXTRAS_REQUIRE = {
-    'all': requirements_optional(),
-    'tests': requirements_test(),
-    'docs': [
-        'sphinx',
-        'sphinx-gallery',
-        'sphinx_rtd_theme',
-        'numpydoc',
-        'matplotlib',
-    ],
-}
 
 setuptools.setup(
     name='cmdstanpy',
@@ -83,8 +50,33 @@ setuptools.setup(
             'install_cxx_toolchain=cmdstanpy.install_cxx_toolchain:__main__',
         ]
     },
-    install_requires=INSTALL_REQUIRES,
+    install_requires=[
+        'pandas',
+        'numpy>=1.21',
+        'tqdm',
+    ],
     python_requires='>=3.7',
-    extras_require=EXTRAS_REQUIRE,
+    extras_require={
+        'all': [
+            'xarray',
+        ],
+        'docs': [
+            'sphinx',
+            'sphinx-gallery',
+            'sphinx_rtd_theme',
+            'numpydoc',
+            'matplotlib',
+        ],
+        'tests': [
+            'flake8',
+            'pylint',
+            'pytest',
+            'pytest-cov',
+            'pytest-order',
+            'mypy',
+            'tqdm',
+            'xarray',
+        ],
+    },
     classifiers=_classifiers.strip().split('\n'),
 )
