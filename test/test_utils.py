@@ -75,7 +75,7 @@ def test_default_path() -> None:
         assert 'CMDSTAN' in os.environ
 
 
-def test_non_spaces_location() -> None:
+def test_non_special_character_location() -> None:
     with tempfile.TemporaryDirectory(
         prefix="cmdstan_tests", dir=_TMPDIR
     ) as tmpdir:
@@ -89,7 +89,7 @@ def test_non_spaces_location() -> None:
         bad_path = os.path.join(tmpdir, 'bad dir')
         os.makedirs(bad_path, exist_ok=True)
         stan = os.path.join(DATAFILES_PATH, 'bernoulli.stan')
-        stan_bad = os.path.join(bad_path, 'bad name.stan')
+        stan_bad = os.path.join(bad_path, 'bad name #~$.stan')
         shutil.copy(stan, stan_bad)
 
         stan_copied = None
@@ -578,12 +578,12 @@ def test_windows_short_path_file() -> None:
 
 
 @mark_windows_only
-def test_windows_short_path_file_with_space() -> None:
+def test_windows_short_path_file_with_special_characters() -> None:
     """Test that the function doesn't touch filename."""
     with tempfile.TemporaryDirectory(
         prefix="cmdstan_tests", dir=_TMPDIR
     ) as tmpdir:
-        original_path = os.path.join(tmpdir, 'new path', 'my file.csv')
+        original_path = os.path.join(tmpdir, 'new path #~$', 'my file.csv')
         os.makedirs(os.path.split(original_path)[0], exist_ok=True)
         assert os.path.exists(os.path.split(original_path)[0])
         assert ' ' in original_path
