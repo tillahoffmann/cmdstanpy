@@ -1,7 +1,6 @@
 """utils test"""
 
 import collections.abc
-import contextlib
 import io
 import json
 import logging
@@ -810,11 +809,9 @@ def test_capture_console() -> None:
 
 
 def test_exit() -> None:
-    sys_stdout = io.StringIO()
-    with contextlib.redirect_stdout(sys_stdout):
-        args = ['bash', '/bin/junk']
-        with pytest.raises(RuntimeError):
-            do_command(args, HERE)
+    args = ['bash', '/bin/junk']
+    with pytest.raises(RuntimeError):
+        do_command(args, HERE)
 
 
 def test_restore_cwd() -> None:

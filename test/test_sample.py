@@ -1,7 +1,5 @@
 """CmdStan method sample tests"""
 
-import contextlib
-import io
 import json
 import logging
 import os
@@ -633,72 +631,65 @@ def test_index_bounds_error() -> None:
             oob_model.sample()
 
 
-def test_show_console(stanfile='bernoulli.stan'):
+def test_show_console(capsys: pytest.CaptureFixture, stanfile='bernoulli.stan'):
     stan = os.path.join(DATAFILES_PATH, stanfile)
     bern_model = CmdStanModel(stan_file=stan)
     jdata = os.path.join(DATAFILES_PATH, 'bernoulli.data.json')
 
-    sys_stdout = io.StringIO()
-    with contextlib.redirect_stdout(sys_stdout):
-        bern_model.sample(
-            data=jdata,
-            chains=2,
-            parallel_chains=2,
-            seed=12345,
-            iter_warmup=100,
-            iter_sampling=100,
-            show_console=True,
-        )
-    console = sys_stdout.getvalue()
+    bern_model.sample(
+        data=jdata,
+        chains=2,
+        parallel_chains=2,
+        seed=12345,
+        iter_warmup=100,
+        iter_sampling=100,
+        show_console=True,
+    )
+    console = capsys.readouterr().out
     assert 'Chain [1] method = sample' in console
     assert 'Chain [2] method = sample' in console
 
 
-def test_show_progress(stanfile='bernoulli.stan'):
+def test_show_progress(capsys: pytest.CaptureFixture,
+                       stanfile='bernoulli.stan'):
     stan = os.path.join(DATAFILES_PATH, stanfile)
     bern_model = CmdStanModel(stan_file=stan)
     jdata = os.path.join(DATAFILES_PATH, 'bernoulli.data.json')
 
-    sys_stderr = io.StringIO()  # tqdm prints to stderr
-    with contextlib.redirect_stderr(sys_stderr):
-        bern_model.sample(
-            data=jdata,
-            chains=2,
-            iter_warmup=100,
-            iter_sampling=100,
-            show_progress=True,
-        )
-    console = sys_stderr.getvalue()
+    bern_model.sample(
+        data=jdata,
+        chains=2,
+        iter_warmup=100,
+        iter_sampling=100,
+        show_progress=True,
+    )
+    console = capsys.readouterr().err
     assert 'chain 1' in console
     assert 'chain 2' in console
     assert 'Sampling completed' in console
 
-    sys_stderr = io.StringIO()  # tqdm prints to stderr
-    with contextlib.redirect_stderr(sys_stderr):
-        bern_model.sample(
-            data=jdata,
-            chains=7,
-            iter_warmup=100,
-            iter_sampling=100,
-            show_progress=True,
-        )
-    console = sys_stderr.getvalue()
+    bern_model.sample(
+        data=jdata,
+        chains=7,
+        iter_warmup=100,
+        iter_sampling=100,
+        show_progress=True,
+    )
+    console = capsys.readouterr().err
     assert 'chain 6' in console
     assert 'chain 7' in console
     assert 'Sampling completed' in console
-    sys_stderr = io.StringIO()  # tqdm prints to stderr
 
-    with contextlib.redirect_stderr(sys_stderr):
-        bern_model.sample(
-            data=jdata,
-            chains=2,
-            chain_ids=[6, 7],
-            iter_warmup=100,
-            iter_sampling=100,
-            force_one_process_per_chain=True,
-            show_progress=True,
-        )
-    console = sys_stderr.getvalue()
+    bern_model.sample(
+        data=jdata,
+        chains=2,
+        chain_ids=[6, 7],
+        iter_warmup=100,
+        iter_sampling=100,
+        force_one_process_per_chain=True,
+        show_progress=True,
+    )
+    console = capsys.readouterr().err
     assert 'chain 6' in console
     assert 'chain 7' in console
     assert 'Sampling completed' in console

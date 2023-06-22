@@ -1,7 +1,5 @@
 """CmdStanModel tests"""
 
-import contextlib
-import io
 import logging
 import os
 import re
@@ -507,25 +505,19 @@ def test_model_includes_implicit() -> None:
     not cmdstan_version_before(2, 32),
     reason="Deprecated syntax removed in Stan 2.32",
 )
-def test_model_format_deprecations() -> None:
+def test_model_format_deprecations(capsys: pytest.CaptureFixture) -> None:
     stan = os.path.join(DATAFILES_PATH, 'format_me_deprecations.stan')
 
     model = CmdStanModel(stan_file=stan, compile=False)
 
-    sys_stdout = io.StringIO()
-    with contextlib.redirect_stdout(sys_stdout):
-        model.format()
-
-    formatted = sys_stdout.getvalue()
+    model.format()
+    formatted = capsys.readouterr().out
     assert "//" in formatted
     assert "#" not in formatted
     assert formatted.count('(') == 5
 
-    sys_stdout = io.StringIO()
-    with contextlib.redirect_stdout(sys_stdout):
-        model.format(canonicalize=True)
-
-    formatted = sys_stdout.getvalue()
+    model.format(canonicalize=True)
+    formatted = capsys.readouterr().out
     print(formatted)
     assert "<-" not in formatted
     assert formatted.count('(') == 0
@@ -541,35 +533,27 @@ def test_model_format_deprecations() -> None:
 @pytest.mark.skipif(
     cmdstan_version_before(2, 29), reason='Options only available later'
 )
-def test_model_format_options() -> None:
+def test_model_format_options(capsys: pytest.CaptureFixture) -> None:
     stan = os.path.join(DATAFILES_PATH, 'format_me.stan')
 
     model = CmdStanModel(stan_file=stan, compile=False)
 
-    sys_stdout = io.StringIO()
-    with contextlib.redirect_stdout(sys_stdout):
-        model.format(max_line_length=10)
-    formatted = sys_stdout.getvalue()
+    model.format(max_line_length=10)
+    formatted = capsys.readouterr().out
     assert len(formatted.splitlines()) > 11
 
-    sys_stdout = io.StringIO()
-    with contextlib.redirect_stdout(sys_stdout):
-        model.format(canonicalize='braces')
-    formatted = sys_stdout.getvalue()
+    model.format(canonicalize='braces')
+    formatted = capsys.readouterr().out
     assert formatted.count('{') == 3
     assert formatted.count('(') == 4
 
-    sys_stdout = io.StringIO()
-    with contextlib.redirect_stdout(sys_stdout):
-        model.format(canonicalize=['parentheses'])
-    formatted = sys_stdout.getvalue()
+    model.format(canonicalize=['parentheses'])
+    formatted = capsys.readouterr().out
     assert formatted.count('{') == 1
     assert formatted.count('(') == 1
 
-    sys_stdout = io.StringIO()
-    with contextlib.redirect_stdout(sys_stdout):
-        model.format(canonicalize=True)
-    formatted = sys_stdout.getvalue()
+    model.format(canonicalize=True)
+    formatted = capsys.readouterr().out
     assert formatted.count('{') == 3
     assert formatted.count('(') == 1
 

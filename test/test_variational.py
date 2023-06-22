@@ -1,7 +1,5 @@
 """CmdStan method variational tests"""
 
-import contextlib
-import io
 import logging
 import os
 import pickle
@@ -224,21 +222,19 @@ def test_single_row_csv() -> None:
             assert int(z_as_ndarray[i, j]) == i + 1
 
 
-def test_show_console() -> None:
+def test_show_console(capsys: pytest.CaptureFixture) -> None:
     stan = os.path.join(DATAFILES_PATH, 'bernoulli.stan')
     bern_model = CmdStanModel(stan_file=stan)
     jdata = os.path.join(DATAFILES_PATH, 'bernoulli.data.json')
 
-    sys_stdout = io.StringIO()
-    with contextlib.redirect_stdout(sys_stdout):
-        # testing data parsing, allow non-convergence
-        bern_model.variational(
-            data=jdata,
-            show_console=True,
-            require_converged=False,
-            seed=12345,
-        )
-    console = sys_stdout.getvalue()
+    # testing data parsing, allow non-convergence
+    bern_model.variational(
+        data=jdata,
+        show_console=True,
+        require_converged=False,
+        seed=12345,
+    )
+    console = capsys.readouterr().out
     assert 'Chain [1] method = variational' in console
 
 

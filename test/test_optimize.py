@@ -1,7 +1,5 @@
 """CmdStan method optimize tests"""
 
-import contextlib
-import io
 import json
 import logging
 import os
@@ -568,18 +566,13 @@ def test_single_row_csv() -> None:
             assert int(z_as_ndarray[i, j]) == i + 1
 
 
-def test_show_console() -> None:
+def test_show_console(capsys: pytest.CaptureFixture) -> None:
     stan = os.path.join(DATAFILES_PATH, 'bernoulli.stan')
     bern_model = CmdStanModel(stan_file=stan)
     jdata = os.path.join(DATAFILES_PATH, 'bernoulli.data.json')
 
-    sys_stdout = io.StringIO()
-    with contextlib.redirect_stdout(sys_stdout):
-        bern_model.optimize(
-            data=jdata,
-            show_console=True,
-        )
-    console = sys_stdout.getvalue()
+    bern_model.optimize(data=jdata, show_console=True)
+    console = capsys.readouterr().out
     assert 'Chain [1] method = optimize' in console
 
 

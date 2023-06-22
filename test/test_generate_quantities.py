@@ -1,7 +1,5 @@
 """CmdStan method generate_quantities tests"""
 
-import contextlib
-import io
 import json
 import logging
 import os
@@ -390,7 +388,7 @@ def test_single_row_csv() -> None:
             assert int(z_as_xr.z.data[0, 0, i, j]) == i + 1
 
 
-def test_show_console() -> None:
+def test_show_console(capsys: pytest.CaptureFixture) -> None:
     stan = os.path.join(DATAFILES_PATH, 'bernoulli.stan')
     bern_model = CmdStanModel(stan_file=stan)
     jdata = os.path.join(DATAFILES_PATH, 'bernoulli.data.json')
@@ -404,14 +402,12 @@ def test_show_console() -> None:
     stan = os.path.join(DATAFILES_PATH, 'bernoulli_ppc.stan')
     model = CmdStanModel(stan_file=stan)
 
-    sys_stdout = io.StringIO()
-    with contextlib.redirect_stdout(sys_stdout):
-        model.generate_quantities(
-            data=jdata,
-            previous_fit=bern_fit,
-            show_console=True,
-        )
-    console = sys_stdout.getvalue()
+    model.generate_quantities(
+        data=jdata,
+        previous_fit=bern_fit,
+        show_console=True,
+    )
+    console = capsys.readouterr().out
     assert 'Chain [1] method = generate' in console
     assert 'Chain [2] method = generate' in console
     assert 'Chain [3] method = generate' in console
