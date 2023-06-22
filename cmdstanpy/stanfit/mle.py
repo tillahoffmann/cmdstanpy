@@ -23,8 +23,8 @@ class CmdStanMLE:
         """Initialize object."""
         if not runset.method == Method.OPTIMIZE:
             raise ValueError(
-                'Wrong runset method, expecting optimize runset, '
-                'found method {}'.format(runset.method)
+                'Wrong runset method, expecting optimize runset, found method '
+                f'{runset.method}'
             )
         self.runset = runset
         # info from runset to be exposed
@@ -37,18 +37,19 @@ class CmdStanMLE:
         self._set_mle_attrs(runset.csv_files[0])
 
     def __repr__(self) -> str:
-        repr = 'CmdStanMLE: model={}{}'.format(
-            self.runset.model, self.runset._args.method_args.compose(0, cmd=[])
-        )
-        repr = '{}\n csv_file:\n\t{}\n output_file:\n\t{}'.format(
-            repr,
+        parts = [
+            f'CmdStanMLE: model={self.runset.model}'
+            f'{self.runset._args.method_args.compose(0, cmd=[])}',
+            'csv_file:',
             '\n\t'.join(self.runset.csv_files),
+            'output_file:',
             '\n\t'.join(self.runset.stdout_files),
-        )
+        ]
         if not self.converged:
-            repr = '{}\n Warning: invalid estimate, '.format(repr)
-            repr = '{} optimization failed to converge.'.format(repr)
-        return repr
+            parts.append(
+                'Warning: invalid estimate, optimization failed to converge.'
+            )
+        return '\n'.join(parts)
 
     def __getattr__(self, attr: str) -> Union[np.ndarray, float]:
         """Synonymous with ``fit.stan_variable(attr)"""

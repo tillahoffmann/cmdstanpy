@@ -264,9 +264,8 @@ def test_init_types() -> None:
         inits=inits_path1,
         show_progress=False,
     )
-    assert 'init={}'.format(inits_path1.replace('\\', '\\\\')) in repr(
-        bern_fit.runset
-    )
+    normalized_inits_path1 = inits_path1.replace('\\', '\\\\')
+    assert f'init={normalized_inits_path1}' in repr(bern_fit.runset)
 
     bern_fit = bern_model.sample(
         data=jdata,
@@ -278,9 +277,7 @@ def test_init_types() -> None:
         inits=[inits_path1, inits_path2],
         show_progress=False,
     )
-    assert 'init={}'.format(inits_path1.replace('\\', '\\\\')) in repr(
-        bern_fit.runset
-    )
+    assert f'init={normalized_inits_path1}' in repr(bern_fit.runset)
 
     with pytest.raises(ValueError):
         bern_model.sample(
@@ -809,7 +806,7 @@ def test_validate_big_run() -> None:
         os.path.join(DATAFILES_PATH, 'runset-big', 'output_icar_nyc-1.csv'),
     ]
     fit = CmdStanMCMC(runset)
-    phis = ['phi[{}]'.format(str(x + 1)) for x in range(2095)]
+    phis = [f'phi[{x + 1}]' for x in range(2095)]
     column_names = list(fit.metadata.method_vars_cols.keys()) + phis
     assert fit.num_draws_sampling == 1000
     assert fit.column_names == tuple(column_names)

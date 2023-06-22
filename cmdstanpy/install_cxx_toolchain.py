@@ -57,7 +57,7 @@ def get_config(dir: str, silent: bool) -> List[str]:
             '/SUPPRESSMSGBOXES',
             '/CURRENTUSER',
             'LANG="English"',
-            '/DIR="{}"'.format(dir),
+            f'/DIR="{dir}"',
             '/NOICONS',
             '/NORESTART',
         ]
@@ -74,9 +74,8 @@ def install_version(
     """Install specified toolchain version."""
     with pushd('.'):
         print(
-            'Installing the C++ toolchain: {}'.format(
-                os.path.splitext(installation_file)[0]
-            )
+            'Installing the C++ toolchain: '
+            f'{os.path.splitext(installation_file)[0]}'
         )
         cmd = [installation_file]
         cmd.extend(get_config(installation_dir, silent))
@@ -96,7 +95,7 @@ def install_version(
                     print(output, flush=True)
         _, stderr = proc.communicate()
         if proc.returncode:
-            print('Installation failed: returncode={}'.format(proc.returncode))
+            print(f'Installation failed: returncode={proc.returncode}')
             if stderr:
                 print(stderr.decode('utf-8').strip())
             if is_installed(installation_dir, version):
@@ -105,7 +104,7 @@ def install_version(
     # check installation
     if is_installed(installation_dir, version):
         os.remove(installation_file)
-    print('Installed {}'.format(os.path.splitext(installation_file)[0]))
+    print(f'Installed {os.path.splitext(installation_file)[0]}')
 
 
 def install_mingw32_make(toolchain_loc: str, verbose: bool = False) -> None:
@@ -149,9 +148,8 @@ def install_mingw32_make(toolchain_loc: str, verbose: bool = False) -> None:
         _, stderr = proc.communicate()
         if proc.returncode:
             print(
-                'mingw32-make installation failed: returncode={}'.format(
-                    proc.returncode
-                )
+                'mingw32-make installation failed: returncode'
+                f'{proc.returncode}'
             )
             if stderr:
                 print(stderr.decode('utf-8').strip())
@@ -196,7 +194,7 @@ def latest_version() -> str:
 
 def retrieve_toolchain(filename: str, url: str, progress: bool = True) -> None:
     """Download toolchain from URL."""
-    print('Downloading C++ toolchain: {}'.format(filename))
+    print(f'Downloading C++ toolchain: {filename}')
     for i in range(6):
         try:
             if progress:
@@ -211,11 +209,11 @@ def retrieve_toolchain(filename: str, url: str, progress: bool = True) -> None:
             print('Failed to download C++ toolchain')
             print(err)
             if i < 5:
-                print('retry ({}/5)'.format(i + 1))
+                print(f'retry ({i + 1}/5)')
                 sleep(1)
                 continue
             sys.exit(3)
-    print('Download successful, file: {}'.format(filename))
+    print(f'Download successful, file: {filename}')
 
 
 def normalize_version(version: str) -> str:
@@ -253,7 +251,7 @@ def get_toolchain_version(name: str, version: str) -> str:
     """Toolchain version."""
     toolchain_folder = ''
     if platform.system() == 'Windows':
-        toolchain_folder = '{}{}'.format(name, version.replace('.', ''))
+        toolchain_folder = f'{name}{version.replace(".", "")}'
 
     return toolchain_folder
 
@@ -271,7 +269,7 @@ def run_rtools_install(args: Dict[str, Any]) -> None:
     if version is None:
         version = latest_version()
     version = normalize_version(version)
-    print("C++ toolchain '{}' version: {}".format(toolchain, version))
+    print(f"C++ toolchain '{toolchain}' version: {version}")
 
     url = get_url(version)
 
@@ -282,7 +280,7 @@ def run_rtools_install(args: Dict[str, Any]) -> None:
     if install_dir is None:
         install_dir = os.path.expanduser(os.path.join('~', _DOT_CMDSTAN))
     validate_dir(install_dir)
-    print('Install directory: {}'.format(install_dir))
+    print(f'Install directory: {install_dir}')
 
     if 'progress' in args:
         progress = args['progress']
@@ -300,7 +298,7 @@ def run_rtools_install(args: Dict[str, Any]) -> None:
     toolchain_folder = get_toolchain_version(toolchain, version)
     with pushd(install_dir):
         if is_installed(toolchain_folder, version):
-            print('C++ toolchain {} already installed'.format(toolchain_folder))
+            print(f'C++ toolchain {toolchain_folder} already installed')
         else:
             if os.path.exists(toolchain_folder):
                 shutil.rmtree(toolchain_folder, ignore_errors=False)

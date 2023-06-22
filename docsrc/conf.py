@@ -422,7 +422,7 @@ nbsphinx_allow_errors = False
 # # intersphinx configuration
 intersphinx_mapping = {
     'python': (
-        'https://docs.python.org/{.major}'.format(sys.version_info),
+        f'https://docs.python.org/{sys.version_info.major}',
         None,
     ),
     'numpy': ('https://numpy.org/doc/stable/', None),

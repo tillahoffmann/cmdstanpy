@@ -48,10 +48,9 @@ def test_good() -> None:
         save_warmup=False,
         thin=1,
     )
-    expected = 'Metadata:\n{}\n'.format(config)
+    expected = f'Metadata:\n{config}'
     metadata = InferenceMetadata(config)
-    actual = '{}'.format(metadata)
-    assert expected == actual
+    assert expected == str(expected)
     assert config == metadata.cmdstan_config
 
     hmc_vars = {

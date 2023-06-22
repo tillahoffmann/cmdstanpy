@@ -236,8 +236,8 @@ def test_cmdstan_version(caplog: pytest.LogCaptureFixture) -> None:
 
             fake_makefile.unlink()
             expect = (
-                'CmdStan installation {} missing makefile, '
-                'cannot get version.'.format(fake_path)
+                f'CmdStan installation {fake_path} missing makefile, cannot '
+                'get version.'
             )
             with caplog.at_level(logging.INFO):
                 cmdstan_version()

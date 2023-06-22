@@ -66,8 +66,8 @@ class CmdStanMCMC:
         """Initialize object."""
         if not runset.method == Method.SAMPLE:
             raise ValueError(
-                'Wrong runset method, expecting sample runset, '
-                'found method {}'.format(runset.method)
+                'Wrong runset method, expecting sample runset, found method '
+                f'{runset.method}'
             )
         self.runset = runset
 
@@ -106,18 +106,17 @@ class CmdStanMCMC:
             self._check_sampler_diagnostics()
 
     def __repr__(self) -> str:
-        repr = 'CmdStanMCMC: model={} chains={}{}'.format(
-            self.runset.model,
-            self.runset.chains,
-            self.runset._args.method_args.compose(0, cmd=[]),
-        )
-        repr = '{}\n csv_files:\n\t{}\n output_files:\n\t{}'.format(
-            repr,
+        parts = [
+            f'CmdStanMCMC: model={self.runset.model} '
+            f'chains={self.runset.chains}'
+            f'{self.runset._args.method_args.compose(0, cmd=[])}',
+            'csv_files:',
             '\n\t'.join(self.runset.csv_files),
+            'output_files:',
             '\n\t'.join(self.runset.stdout_files),
-        )
+        ]
         # TODO - hamiltonian, profiling files
-        return repr
+        return '\n'.join(parts)
 
     def __getattr__(self, attr: str) -> np.ndarray:
         """Synonymous with ``fit.stan_variable(attr)"""
@@ -333,13 +332,9 @@ class CmdStanMCMC:
                         and dzero[key] != drest[key]
                     ):
                         raise ValueError(
-                            'CmdStan config mismatch in Stan CSV file {}: '
-                            'arg {} is {}, expected {}'.format(
-                                self.runset.csv_files[i],
-                                key,
-                                dzero[key],
-                                drest[key],
-                            )
+                            'CmdStan config mismatch in Stan CSV file '
+                            f'{self.runset.csv_files[i]}: arg {key} is '
+                            f'{dzero[key]}, expected {drest[key]}'
                         )
                 if not self._is_fixed_param:
                     self._divergences[i] = drest['ct_divergences']
@@ -493,29 +488,28 @@ class CmdStanMCMC:
 
         if not isinstance(sig_figs, int) or sig_figs < 1 or sig_figs > 18:
             raise ValueError(
-                'Keyword "sig_figs" must be an integer between 1 and 18,'
-                ' found {}'.format(sig_figs)
+                'Keyword "sig_figs" must be an integer between 1 and 18, '
+                f'found {sig_figs}'
             )
         csv_sig_figs = self._sig_figs or 6
         if sig_figs > csv_sig_figs:
             get_logger().warning(
-                'Requesting %d significant digits of output, but CSV files'
-                ' only have %d digits of precision.',
-                sig_figs,
-                csv_sig_figs,
+                'Requesting %d significant digits of output, but CSV files '
+                'only have %d digits of precision.',
+                sig_figs, csv_sig_figs,
             )
         sig_figs_str = f'--sig_figs={sig_figs}'
         cmd_path = os.path.join(
             cmdstan_path(), 'bin', 'stansummary' + EXTENSION
         )
-        tmp_csv_file = 'stansummary-{}-'.format(self.runset._args.model_name)
+        tmp_csv_file = f'stansummary-{self.runset._args.model_name}-'
         tmp_csv_path = create_named_text_file(
             dir=_TMPDIR, prefix=tmp_csv_file, suffix='.csv', name_only=True
         )
-        csv_str = '--csv_filename={}'.format(tmp_csv_path)
+        csv_str = f'--csv_filename={tmp_csv_path}'
         # TODO: remove at some future release
         if cmdstan_version_before(2, 24):
-            csv_str = '--csv_file={}'.format(tmp_csv_path)
+            csv_str = f'--csv_file={tmp_csv_path}'
         cmd = [
             cmd_path,
             percentiles_str,
@@ -606,7 +600,7 @@ class CmdStanMCMC:
                     var not in self.metadata.method_vars_cols
                     and var not in self.metadata.stan_vars_cols
                 ):
-                    raise ValueError('Unknown variable: {}'.format(var))
+                    raise ValueError(f'Unknown variable: {var}')
                 if var in self.metadata.method_vars_cols:
                     cols.append(var)
                 else:

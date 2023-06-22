@@ -17,9 +17,8 @@ def flatten_chains(draws_array: np.ndarray) -> np.ndarray:
     """
     if len(draws_array.shape) != 3:
         raise ValueError(
-            'Expecting 3D array, found array with {} dims'.format(
-                len(draws_array.shape)
-            )
+            f'Expecting 3D array, found array with {len(draws_array.shape)} '
+            'dims'
         )
 
     num_rows = draws_array.shape[0] * draws_array.shape[1]

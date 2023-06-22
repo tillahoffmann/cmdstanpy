@@ -70,13 +70,12 @@ def do_command(
                     serror = os.strerror(proc.returncode)
                 except (ArithmeticError, ValueError):
                     pass
-                msg = 'Command {}\n\t{} {}'.format(
-                    cmd, returncode_msg(proc.returncode), serror
+                raise RuntimeError(
+                    f'Command {cmd}\n\t{returncode_msg(proc.returncode)} '
+                    f'{serror}'
                 )
-                raise RuntimeError(msg)
     except OSError as e:
-        msg = 'Command: {}\nfailed with error {}\n'.format(cmd, str(e))
-        raise RuntimeError(msg) from e
+        raise RuntimeError(f'Command: {cmd}\nfailed with error {e}') from e
 
 
 def returncode_msg(retcode: int) -> str:

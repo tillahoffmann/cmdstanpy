@@ -89,7 +89,7 @@ def get_headers() -> Dict[str, str]:
     headers = {}
     GITHUB_PAT = os.environ.get("GITHUB_PAT")  # pylint:disable=invalid-name
     if GITHUB_PAT is not None:
-        headers["Authorization"] = "token {}".format(GITHUB_PAT)
+        headers["Authorization"] = f"token {GITHUB_PAT}"
     return headers
 
 
@@ -105,7 +105,7 @@ def latest_version() -> str:
             print('Cannot connect to github.')
             print(e)
             if i < 5:
-                print('retry ({}/5)'.format(i + 1))
+                print(f'retry ({i + 1}/5)')
                 sleep(1)
                 continue
             raise CmdStanRetrieveError(
@@ -409,20 +409,20 @@ def install_version(
     """
     with pushd(cmdstan_version):
         print(
-            'Building version {}, may take several minutes, '
-            'depending on your system.'.format(cmdstan_version)
+            f'Building version {cmdstan_version}, may take several minutes, '
+            'depending on your system.'
         )
         if overwrite and os.path.exists('.'):
             print(
                 'Overwrite requested, remove existing build of version '
-                '{}'.format(cmdstan_version)
+                f'{cmdstan_version}'
             )
             clean_all(verbose)
-            print('Rebuilding version {}'.format(cmdstan_version))
+            print(f'Rebuilding version {cmdstan_version}')
         build(verbose, progress=progress, cores=cores)
         print('Test model compilation')
         compile_example(verbose)
-    print('Installed {}'.format(cmdstan_version))
+    print(f'Installed {cmdstan_version}')
 
 
 def is_version_available(version: str) -> bool:
@@ -439,14 +439,13 @@ def is_version_available(version: str) -> bool:
         except urllib.error.URLError as e:
             if i < 5:
                 print(
-                    'checking version {} availability, retry ({}/5)'.format(
-                        version, i + 1
-                    )
+                    f'checking version {version} availability, retry '
+                    f'({i + 1}/5)'
                 )
                 sleep(1)
                 continue
-            print('Release {} is unavailable from URL {}'.format(version, url))
-            print('URLError: {}'.format(e.reason))
+            print(f'Release {version} is unavailable from URL {url}')
+            print(f'URLError: {e.reason}')
             is_available = False
     return is_available
 
@@ -455,7 +454,7 @@ def retrieve_version(version: str, progress: bool = True) -> None:
     """Download specified CmdStan version."""
     if version is None or version == '':
         raise ValueError('Argument "version" unspecified.')
-    print('Downloading CmdStan version {}'.format(version))
+    print(f'Downloading CmdStan version {version}')
     url = get_download_url(version)
     for i in range(6):  # always retry to allow for transient URLErrors
         try:
@@ -471,27 +470,22 @@ def retrieve_version(version: str, progress: bool = True) -> None:
             break
         except urllib.error.HTTPError as e:
             raise CmdStanRetrieveError(
-                'HTTPError: {}\n'
-                'Version {} not available from github.com.'.format(
-                    e.code, version
-                )
+                f'HTTPError: {e.code}\n'
+                f'Version {version} not available from github.com.'
             ) from e
         except urllib.error.URLError as e:
             print(
-                'Failed to download CmdStan version {} from github.com'.format(
-                    version
-                )
+                f'Failed to download CmdStan version {version} from github.com.'
             )
             print(e)
             if i < 5:
-                print('retry ({}/5)'.format(i + 1))
+                print(f'retry ({i + 1}/5)')
                 sleep(1)
                 continue
-            print('Version {} not available from github.com.'.format(version))
-            raise CmdStanRetrieveError(
-                'Version {} not available from github.com.'.format(version)
-            ) from e
-    print('Download successful, file: {}'.format(file_tmp))
+            msg = f'Version {version} not available from github.com.'
+            print(msg)
+            raise CmdStanRetrieveError(msg) from e
+    print(f'Download successful, file: {file_tmp}')
     try:
         print('Extracting distribution')
         tar = tarfile.open(file_tmp)
@@ -501,13 +495,13 @@ def retrieve_version(version: str, progress: bool = True) -> None:
         cmdstan_dir = f'cmdstan-{version}'
         if top_dir != cmdstan_dir:
             raise CmdStanInstallError(
-                'tarfile should contain top-level dir {},'
-                'but found dir {} instead.'.format(cmdstan_dir, top_dir)
+                f'tarfile should contain top-level dir {cmdstan_dir}, but '
+                f'found dir {top_dir} instead.'
             )
         target = os.getcwd()
         if is_windows():
             # fixes long-path limitation on Windows
-            target = r'\\?\{}'.format(target)
+            target = fr'\\?\{target}'
 
         if progress and progbar.allow_show_progress():
             for member in tqdm(
@@ -569,7 +563,7 @@ def run_install(args: Union[InteractiveSettings, InstallationSettings]) -> None:
     Run a (potentially interactive) installation
     """
     validate_dir(args.dir)
-    print('CmdStan install directory: {}'.format(args.dir))
+    print(f'CmdStan install directory: {args.dir}')
 
     # these accesses just 'warm up' the interactive install
     _ = args.progress
@@ -591,12 +585,12 @@ def run_install(args: Union[InteractiveSettings, InstallationSettings]) -> None:
         )
         if not already_installed or args.overwrite:
             if is_version_available(args.version):
-                print('Installing CmdStan version: {}'.format(args.version))
+                print(f'Installing CmdStan version: {args.version}')
             else:
                 raise ValueError(
-                    f'Version {args.version} cannot be downloaded. '
-                    'Connection to GitHub failed. '
-                    'Check firewall settings or ensure this version exists.'
+                    f'Version {args.version} cannot be downloaded. Connection '
+                    'to GitHub failed. Check firewall settings or ensure this '
+                    'version exists.'
                 )
             retrieve_version(args.version, args.progress)
             install_version(
@@ -607,7 +601,7 @@ def run_install(args: Union[InteractiveSettings, InstallationSettings]) -> None:
                 cores=args.cores,
             )
         else:
-            print('CmdStan version {} already installed'.format(args.version))
+            print(f'CmdStan version {args.version} already installed')
 
 
 def parse_cmdline_args() -> Dict[str, Any]:

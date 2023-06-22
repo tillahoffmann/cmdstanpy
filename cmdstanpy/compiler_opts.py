@@ -74,9 +74,8 @@ class CompilerOptions:
         self._user_header = str(user_header) if user_header is not None else ''
 
     def __repr__(self) -> str:
-        return 'stanc_options={}, cpp_options={}'.format(
-            self._stanc_options, self._cpp_options
-        )
+        return f'stanc_options={self._stanc_options}, ' \
+            f'cpp_options={self._cpp_options}'
 
     def __eq__(self, other: Any) -> bool:
         """Overrides the default implementation"""
@@ -188,7 +187,7 @@ class CompilerOptions:
             bad_paths = [dir for dir in paths if not os.path.exists(dir)]
             if any(bad_paths):
                 raise ValueError(
-                    'invalid include paths: {}'.format(', '.join(bad_paths))
+                    f'invalid include paths: {", ".join(bad_paths)}'
                 )
 
             self._stanc_options['include-paths'] = [

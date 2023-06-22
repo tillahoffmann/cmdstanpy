@@ -39,7 +39,7 @@ def windows_short_path(path: str) -> str:
     if not os.path.exists(base_path):
         raise RuntimeError(
             'Windows short path function needs a valid directory. '
-            'Base directory does not exist: "{}"'.format(base_path)
+            f'Base directory does not exist: "{base_path}"'
         )
 
     import ctypes
@@ -127,7 +127,7 @@ class MaybeDictToFilePath:
                 self._unlink[i] = True
             elif isinstance(obj, (str, os.PathLike)):
                 if not os.path.exists(obj):
-                    raise ValueError("File doesn't exist {}".format(obj))
+                    raise ValueError(f"File doesn't exist {obj}")
                 self._paths[i] = obj
             elif isinstance(obj, list):
                 err_msgs = []
@@ -135,14 +135,12 @@ class MaybeDictToFilePath:
                 for j, obj_item in enumerate(obj):
                     if not isinstance(obj_item, str):
                         err_msgs.append(
-                            (
-                                'List element {} must be a filename string,'
-                                ' found {}'
-                            ).format(j, obj_item)
+                            f'List element {j} must be a filename string, '
+                            f'found {obj_item}'
                         )
                     elif not os.path.exists(obj_item):
                         missing_obj_items.append(
-                            "File doesn't exist: {}".format(obj_item)
+                            f"File doesn't exist: {obj_item}"
                         )
                 if err_msgs:
                     raise ValueError('\n'.join(err_msgs))

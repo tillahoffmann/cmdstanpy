@@ -97,25 +97,21 @@ class RunSet:
                     )
 
     def __repr__(self) -> str:
-        repr = 'RunSet: chains={}, chain_ids={}, num_processes={}'.format(
-            self._chains, self._chain_ids, self._num_procs
-        )
-        repr = '{}\n cmd (chain 1):\n\t{}'.format(repr, self.cmd(0))
-        repr = '{}\n retcodes={}'.format(repr, self._retcodes)
-        repr = f'{repr}\n per-chain output files (showing chain 1 only):'
-        repr = '{}\n csv_file:\n\t{}'.format(repr, self._csv_files[0])
+        parts = [
+            f'RunSet: chains={self._chains}, chain_ids={self._chain_ids}, '
+            f'num_processes={self._num_procs}',
+            f'cmd (chain 1):\n\t{self.cmd(0)}',
+            f'retcodes={self._retcodes}',
+            'per-chain output files (showing chain 1 only):'
+            f'csv_file:\n\t{self._csv_files[0]}'
+        ]
+
         if self._args.save_latent_dynamics:
-            repr = '{}\n diagnostics_file:\n\t{}'.format(
-                repr, self._diagnostic_files[0]
-            )
+            parts.append(f'diagnostics_file:\n\t{self._diagnostic_files[0]}')
         if self._args.save_profile:
-            repr = '{}\n profile_file:\n\t{}'.format(
-                repr, self._profile_files[0]
-            )
-        repr = '{}\n console_msgs (if any):\n\t{}'.format(
-            repr, self._stdout_files[0]
-        )
-        return repr
+            parts.append(f'profile_file:\n\t{self._profile_files[0]}')
+        parts.append(f'console_msgs (if any):\n\t{self._stdout_files[0]}')
+        return '\n'.join(parts)
 
     @property
     def model(self) -> str:
@@ -276,18 +272,18 @@ class RunSet:
                 pass
             os.remove(test_path)  # cleanup
         except (IOError, OSError, PermissionError) as exc:
-            raise RuntimeError('Cannot save to path: {}'.format(dir)) from exc
+            raise RuntimeError(f'Cannot save to path: {dir}') from exc
 
         for i in range(self.chains):
             if not os.path.exists(self._csv_files[i]):
                 raise ValueError(
-                    'Cannot access CSV file {}'.format(self._csv_files[i])
+                    f'Cannot access CSV file {self._csv_files[i]}'
                 )
 
             to_path = os.path.join(dir, os.path.basename(self._csv_files[i]))
             if os.path.exists(to_path):
                 raise ValueError(
-                    'File exists, not overwriting: {}'.format(to_path)
+                    f'File exists, not overwriting: {to_path}'
                 )
             try:
                 get_logger().debug(
@@ -297,7 +293,7 @@ class RunSet:
                 self._csv_files[i] = to_path
             except (IOError, OSError, PermissionError) as e:
                 raise ValueError(
-                    'Cannot save to file: {}'.format(to_path)
+                    f'Cannot save to file: {to_path}'
                 ) from e
 
     def raise_for_timeouts(self) -> None:

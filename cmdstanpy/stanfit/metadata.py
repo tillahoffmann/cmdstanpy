@@ -25,7 +25,7 @@ class InferenceMetadata:
         self._stan_vars_types = stan_vars_types
 
     def __repr__(self) -> str:
-        return 'Metadata:\n{}\n'.format(self._cmdstan_config)
+        return 'Metadata:\n{self._cmdstan_config}'
 
     @property
     def cmdstan_config(self) -> Dict[str, Any]:

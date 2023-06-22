@@ -28,7 +28,7 @@ def test_from_csv_files(caplog: pytest.LogCaptureFixture) -> None:
     goodfiles_path = os.path.join(DATAFILES_PATH, 'runset-good', 'bern')
     csv_files = []
     for i in range(4):
-        csv_files.append('{}-{}.csv'.format(goodfiles_path, i + 1))
+        csv_files.append(f'{goodfiles_path}-{i + 1}.csv')
 
     # gq_model
     stan = os.path.join(DATAFILES_PATH, 'bernoulli_ppc.stan')
@@ -103,7 +103,7 @@ def test_from_csv_files_bad() -> None:
     )
     csv_files = []
     for i in range(4):
-        csv_files.append('{}-{}.csv'.format(goodfiles_path, i + 1))
+        csv_files.append(f'{goodfiles_path}-{i + 1}.csv')
 
     with pytest.raises(Exception, match='Invalid sample from Stan CSV files'):
         model.generate_quantities(data=jdata, previous_fit=csv_files)

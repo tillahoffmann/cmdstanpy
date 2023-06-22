@@ -145,9 +145,8 @@ class CmdStanModel:
         if model_name is not None:
             if not model_name.strip():
                 raise ValueError(
-                    'Invalid value for argument model name, found "{}"'.format(
-                        model_name
-                    )
+                    'Invalid value for argument model name, found '
+                    f'"{model_name}"'
                 )
             self._name = model_name.strip()
 
@@ -162,11 +161,11 @@ class CmdStanModel:
         else:
             self._stan_file = os.path.realpath(os.path.expanduser(stan_file))
             if not os.path.exists(self._stan_file):
-                raise ValueError('no such file {}'.format(self._stan_file))
+                raise ValueError(f'no such file {self._stan_file}')
             _, filename = os.path.split(stan_file)
             if len(filename) < 6 or not filename.endswith('.stan'):
                 raise ValueError(
-                    'invalid stan filename {}'.format(self._stan_file)
+                    f'invalid stan filename {self._stan_file}'
                 )
             if not self._name:
                 self._name, _ = os.path.splitext(filename)
@@ -199,16 +198,16 @@ class CmdStanModel:
         if exe_file is not None:
             self._exe_file = os.path.realpath(os.path.expanduser(exe_file))
             if not os.path.exists(self._exe_file):
-                raise ValueError('no such file {}'.format(self._exe_file))
+                raise ValueError(f'no such file {self._exe_file}')
             _, exename = os.path.split(self._exe_file)
             if not self._name:
                 self._name, _ = os.path.splitext(exename)
             else:
                 if self._name != os.path.splitext(exename)[0]:
                     raise ValueError(
-                        'Name mismatch between Stan file and compiled'
-                        ' executable, expecting basename: {}'
-                        ' found: {}.'.format(self._name, exename)
+                        'Name mismatch between Stan file and compiled '
+                        f'executable, expecting basename: {self._name} found '
+                        f'{exename}.'
                     )
 
         if platform.system() == 'Windows':
@@ -236,11 +235,13 @@ class CmdStanModel:
             self.compile(force=str(compile).lower() == 'force')
 
     def __repr__(self) -> str:
-        repr = 'CmdStanModel: name={}'.format(self._name)
-        repr = '{}\n\t stan_file={}'.format(repr, self._stan_file)
-        repr = '{}\n\t exe_file={}'.format(repr, self._exe_file)
-        repr = '{}\n\t compiler_options={}'.format(repr, self._compiler_options)
-        return repr
+        parts = [
+            f'CmdStanModel: name={self._name}',
+            f'stan_file={self._stan_file}',
+            f'exe_file={self._exe_file}',
+            f'compiler_options={self._compiler_options}',
+        ]
+        return '\n\t'.join(parts)
 
     @property
     def name(self) -> str:
@@ -350,11 +351,9 @@ class CmdStanModel:
                         cmd.append('--print-canonical')
                     else:
                         raise ValueError(
-                            "Invalid arguments passed for current CmdStan"
-                            + " version({})\n".format(
-                                cmdstan_version() or "Unknown"
-                            )
-                            + "--canonicalize requires 2.29 or higher"
+                            "Invalid arguments passed for current CmdStan "
+                            f"version ({cmdstan_version() or 'Unknown'}). "
+                            "--canonicalize requires 2.29 or higher"
                         )
                 else:
                     if isinstance(canonicalize, str):
@@ -373,9 +372,9 @@ class CmdStanModel:
                 cmd.append(f'--max-line-length={max_line_length}')
             elif max_line_length != 78:
                 raise ValueError(
-                    "Invalid arguments passed for current CmdStan version"
-                    + " ({})\n".format(cmdstan_version() or "Unknown")
-                    + "--max-line-length requires 2.29 or higher"
+                    "Invalid arguments passed for current CmdStan version "
+                    f"({cmdstan_version() or 'Unknown'}). "
+                    "--max-line-length requires 2.29 or higher"
                 )
 
             out = subprocess.run(
@@ -730,9 +729,8 @@ class CmdStanModel:
         runset.raise_for_timeouts()
 
         if not runset._check_retcodes():
-            msg = "Error during optimization! Command '{}' failed: {}".format(
-                ' '.join(runset.cmd(0)), runset.get_err_msgs()
-            )
+            msg = "Error during optimization! Command " \
+                f"'{' '.join(runset.cmd(0))}' failed: {runset.get_err_msgs()}"
             if 'Line search failed' in msg and not require_converged:
                 get_logger().warning(msg)
             else:
@@ -985,9 +983,7 @@ class CmdStanModel:
                 chains = 4
         if chains < 1:
             raise ValueError(
-                'Chains must be a positive integer value, found {}.'.format(
-                    chains
-                )
+                f'chains must be a positive integer value, found {chains}.'
             )
         if chain_ids is None:
             chain_ids = [i + 1 for i in range(chains)]
@@ -995,23 +991,22 @@ class CmdStanModel:
             if isinstance(chain_ids, int):
                 if chain_ids < 1:
                     raise ValueError(
-                        'Chain_id must be a positive integer value,'
-                        ' found {}.'.format(chain_ids)
+                        'chain_id must be a positive integer value, found '
+                        f'{chain_ids}.'
                     )
                 chain_ids = [i + chain_ids for i in range(chains)]
             else:
                 if not len(chain_ids) == chains:
                     raise ValueError(
-                        'Chain_ids must correspond to number of chains'
-                        ' specified {} chains, found {} chain_ids.'.format(
-                            chains, len(chain_ids)
-                        )
+                        'chain_ids must correspond to number of chains '
+                        f'specified {chains} chains, found {len(chain_ids)} '
+                        'chain_ids.'
                     )
                 for chain_id in chain_ids:
                     if chain_id < 0:
                         raise ValueError(
-                            'Chain_id must be a non-negative integer value,'
-                            ' found {}.'.format(chain_id)
+                            'chain_id must be a non-negative integer value, '
+                            'found {chain_id}.'
                         )
 
         sampler_args = SamplerArgs(
@@ -1058,14 +1053,14 @@ class CmdStanModel:
             elif parallel_chains < 1:
                 raise ValueError(
                     'Argument parallel_chains must be a positive integer, '
-                    'found {}.'.format(parallel_chains)
+                    f'found {parallel_chains}.'
                 )
             if threads_per_chain is None:
                 threads_per_chain = 1
             if threads_per_chain < 1:
                 raise ValueError(
                     'Argument threads_per_chain must be a positive integer, '
-                    'found {}.'.format(threads_per_chain)
+                    f'found {threads_per_chain}.'
                 )
 
             parallel_procs = parallel_chains
@@ -1314,16 +1309,16 @@ class CmdStanModel:
                 fit_csv_files = previous_fit
                 fit_object = from_csv(fit_csv_files)  # type: ignore
             except ValueError as e:
-                raise ValueError(
-                    'Invalid sample from Stan CSV files, error:\n\t{}\n\t'
-                    ' while processing files\n\t{}'.format(
-                        repr(e), '\n\t'.join(previous_fit)
-                    )
-                ) from e
+                # Ignore type checks https://github.com/python/mypy/issues/14891
+                parts = [
+                    'Invalid sample from Stan CSV files, error:', repr(e),
+                    *previous_fit  # type: ignore
+                ]
+                raise ValueError('\n\t'.join(parts)) from e
         else:
             raise ValueError(
-                'Previous fit must be either CmdStanPy fit object'
-                ' or list of paths to Stan CSV files.'
+                'Previous fit must be either CmdStanPy fit object '
+                'or list of paths to Stan CSV files.'
             )
         if isinstance(fit_object, CmdStanMCMC):
             chains = fit_object.chains
@@ -1591,12 +1586,11 @@ class CmdStanModel:
                 msg = (
                     'Variational algorithm gradient calculation failed. '
                     'Double the value of argument "grad_samples", '
-                    'current value is {}.'.format(grad_samples)
+                    f'current value is {grad_samples}.'
                 )
             else:
-                msg = 'Error during variational inference: {}'.format(
-                    runset.get_err_msgs()
-                )
+                msg = 'Error during variational inference: ' \
+                    f'{runset.get_err_msgs()}'
             raise RuntimeError(msg)
         # pylint: disable=invalid-name
         vb = CmdStanVB(runset)
@@ -1694,8 +1688,8 @@ class CmdStanModel:
         logger_prefix = 'CmdStan'
         console_prefix = ''
         if runset.one_process_per_chain:
-            logger_prefix = 'Chain [{}]'.format(runset.chain_ids[idx])
-            console_prefix = 'Chain [{}] '.format(runset.chain_ids[idx])
+            logger_prefix = f'Chain [{runset.chain_ids[idx]}]'
+            console_prefix = f'Chain [{runset.chain_ids[idx]}] '
 
         cmd = runset.cmd(idx)
         get_logger().debug('CmdStan args: %s', cmd)
@@ -1752,8 +1746,7 @@ class CmdStanModel:
                         print(f'{console_prefix}{line}')
             fd_out.close()
         except OSError as e:
-            msg = 'Failed with error {}\n'.format(str(e))
-            raise RuntimeError(msg) from e
+            raise RuntimeError(f'Failed with error {e}') from e
         finally:
             fd_out.close()
 

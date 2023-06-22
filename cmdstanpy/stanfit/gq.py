@@ -63,7 +63,7 @@ class CmdStanGQ(Generic[Fit]):
         if not runset.method == Method.GENERATE_QUANTITIES:
             raise ValueError(
                 'Wrong runset method, expecting generate_quantities runset, '
-                'found method {}'.format(runset.method)
+                'found method {runset.method}'
             )
         self.runset = runset
 
@@ -74,17 +74,15 @@ class CmdStanGQ(Generic[Fit]):
         self._metadata = InferenceMetadata(config)
 
     def __repr__(self) -> str:
-        repr = 'CmdStanGQ: model={} chains={}{}'.format(
-            self.runset.model,
-            self.chains,
-            self.runset._args.method_args.compose(0, cmd=[]),
-        )
-        repr = '{}\n csv_files:\n\t{}\n output_files:\n\t{}'.format(
-            repr,
+        parts = [
+            f'CmdStanGQ: model={self.runset.model} chains={self.chains}'
+            f'{self.runset._args.method_args.compose(0, cmd=[])}',
+            'csv files:',
             '\n\t'.join(self.runset.csv_files),
+            'output_files:'
             '\n\t'.join(self.runset.stdout_files),
-        )
-        return repr
+        ]
+        return '\n'.join(parts)
 
     def __getattr__(self, attr: str) -> np.ndarray:
         """Synonymous with ``fit.stan_variable(attr)"""
@@ -137,13 +135,9 @@ class CmdStanGQ(Generic[Fit]):
                         and dzero[key] != drest[key]
                     ):
                         raise ValueError(
-                            'CmdStan config mismatch in Stan CSV file {}: '
-                            'arg {} is {}, expected {}'.format(
-                                self.runset.csv_files[i],
-                                key,
-                                dzero[key],
-                                drest[key],
-                            )
+                            'CmdStan config mismatch in Stan CSV file '
+                            f'{self.runset.csv_files[i]}: arg {key} is '
+                            f'{dzero[key]}, expected {drest[key]}'
                         )
         return dzero
 
@@ -337,7 +331,7 @@ class CmdStanGQ(Generic[Fit]):
                 ):
                     mcmc_vars.append(var)
                 else:
-                    raise ValueError('Unknown variable: {}'.format(var))
+                    raise ValueError(f'Unknown variable: {var}')
         else:
             gq_cols = list(self.column_names)
             vars_list = gq_cols
@@ -455,7 +449,7 @@ class CmdStanGQ(Generic[Fit]):
                         mcmc_vars_list.append(var)
                         dup_vars.append(var)
                     else:
-                        raise ValueError('Unknown variable: {}'.format(var))
+                        raise ValueError(f'Unknown variable: {var}')
         else:
             vars_list = list(self.metadata.stan_vars_cols.keys())
             if inc_sample:

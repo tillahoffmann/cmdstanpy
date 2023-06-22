@@ -24,22 +24,22 @@ class CmdStanVB:
         if not runset.method == Method.VARIATIONAL:
             raise ValueError(
                 'Wrong runset method, expecting variational inference, '
-                'found method {}'.format(runset.method)
+                f'found method {runset.method}'
             )
         self.runset = runset
         self._set_variational_attrs(runset.csv_files[0])
 
     def __repr__(self) -> str:
-        repr = 'CmdStanVB: model={}{}'.format(
-            self.runset.model, self.runset._args.method_args.compose(0, cmd=[])
-        )
-        repr = '{}\n csv_file:\n\t{}\n output_file:\n\t{}'.format(
-            repr,
+        parts = [
+            f'CmdStanVB: model={self.runset.model}'
+            f'{self.runset._args.method_args.compose(0, cmd=[])}',
+            'csv_file:',
             '\n\t'.join(self.runset.csv_files),
+            'output_file:',
             '\n\t'.join(self.runset.stdout_files),
-        )
+        ]
         # TODO - diagnostic, profiling files
-        return repr
+        return '\n'.join(parts)
 
     def __getattr__(self, attr: str) -> Union[np.ndarray, float]:
         """Synonymous with ``fit.stan_variable(attr)"""

@@ -29,7 +29,7 @@ class BaseType(Enum):
     PRIM = auto()  # future: int / real
 
     def __repr__(self) -> str:
-        return '<%s.%s>' % (self.__class__.__name__, self.name)
+        return f'<{self.__class__.__name__}.{self.name}>'
 
 
 def check_sampler_csv(
@@ -47,15 +47,13 @@ def check_sampler_csv(
     elif thin > _CMDSTAN_THIN:
         if 'thin' not in meta:
             raise ValueError(
-                'bad Stan CSV file {}, '
-                'config error, expected thin = {}'.format(path, thin)
+                f'bad Stan CSV file {path}, '
+                f'config error, expected thin = {thin}'
             )
         if meta['thin'] != thin:
             raise ValueError(
-                'bad Stan CSV file {}, '
-                'config error, expected thin = {}, found {}'.format(
-                    path, thin, meta['thin']
-                )
+                f'bad Stan CSV file {path}, '
+                f'config error, expected thin = {thin}, found {meta["thin"]}'
             )
     draws_sampling = iter_sampling
     if draws_sampling is None:
@@ -67,22 +65,19 @@ def check_sampler_csv(
     draws_sampling = int(math.ceil(draws_sampling / thin))
     if meta['draws_sampling'] != draws_sampling:
         raise ValueError(
-            'bad Stan CSV file {}, expected {} draws, found {}'.format(
-                path, draws_sampling, meta['draws_sampling']
-            )
+            f'bad Stan CSV file {path}, expected {draws_sampling} draws, found '
+            f'{meta["draws_sampling"]}'
         )
     if save_warmup:
         if not ('save_warmup' in meta and meta['save_warmup'] == 1):
             raise ValueError(
-                'bad Stan CSV file {}, '
-                'config error, expected save_warmup = 1'.format(path)
+                f'bad Stan CSV file {path}, config error, expected '
+                'save_warmup = 1'
             )
         if meta['draws_warmup'] != draws_warmup:
             raise ValueError(
-                'bad Stan CSV file {}, '
-                'expected {} warmup draws, found {}'.format(
-                    path, draws_warmup, meta['draws_warmup']
-                )
+                f'bad Stan CSV file {path}, expected {draws_warmup} warmup '
+                f'draws, found {meta["draws_warmup"]}'
             )
     return meta
 
@@ -127,9 +122,7 @@ def scan_optimize_csv(path: str, save_iters: bool = False) -> Dict[str, Any]:
             line = fd.readline().strip()
             if len(line) < 1:
                 raise ValueError(
-                    'cannot parse CSV file {}, error at line {}'.format(
-                        path, lineno + i
-                    )
+                    f'cannot parse CSV file {path}, error at line {lineno + i}'
                 )
             xs = line.split(',')
             if save_iters:
@@ -168,9 +161,7 @@ def scan_variational_csv(path: str) -> Dict[str, Any]:
             lineno += 1
             if not line.startswith('eta'):
                 raise ValueError(
-                    'line {}: expecting eta, found:\n\t "{}"'.format(
-                        lineno, line
-                    )
+                    f'line {lineno}: expecting eta, found:\n\t "{line}"'
                 )
             _, eta = line.split('=')
             dict['eta'] = float(eta)
@@ -350,21 +341,20 @@ def scan_hmc_params(
     lineno += 1
     if not line == '# Adaptation terminated':
         raise ValueError(
-            'line {}: expecting metric, found:\n\t "{}"'.format(lineno, line)
+            f'line {lineno}: expecting metric, found:\n\t "{line}"'
         )
     line = fd.readline().strip()
     lineno += 1
     label, step_size = line.split('=')
     if not label.startswith('# Step size'):
         raise ValueError(
-            'line {}: expecting step size, '
-            'found:\n\t "{}"'.format(lineno, line)
+            f'line {lineno}: expecting step size, found:\n\t "{line}"'
         )
     try:
         float(step_size.strip())
     except ValueError as e:
         raise ValueError(
-            'line {}: invalid step size: {}'.format(lineno, step_size)
+            f'line {lineno}: invalid step size: {step_size}'
         ) from e
     if metric == 'unit_e':
         return lineno
@@ -380,8 +370,7 @@ def scan_hmc_params(
         )
     ):
         raise ValueError(
-            'line {}: invalid or missing mass matrix '
-            'specification'.format(lineno)
+            f'line {lineno}: invalid or missing mass matrix specification'
         )
     line = fd.readline().lstrip(' #\t')
     lineno += 1
@@ -394,8 +383,8 @@ def scan_hmc_params(
             lineno += 1
             if len(line.split(',')) != num_unconstrained_params:
                 raise ValueError(
-                    'line {}: invalid or missing mass matrix '
-                    'specification'.format(lineno)
+                    f'line {lineno}: invalid or missing mass matrix '
+                    'specification'
                 )
         return lineno
 
@@ -424,12 +413,10 @@ def scan_sampling_iters(
         data = line.split(',')
         if len(data) != num_cols:
             raise ValueError(
-                'line {}: bad draw, expecting {} items, found {}\n'.format(
-                    lineno, num_cols, len(line.split(','))
-                )
-                + 'This error could be caused by running out of disk space.\n'
-                'Try clearing up TEMP or setting output_dir to a path'
-                ' on another drive.',
+                f'line {lineno}: bad draw, expecting {num_cols} items, found '
+                f'{len(line.split(","))}\nThis error could be caused by '
+                'running out of disk space.\nTry clearing up TEMP or setting '
+                'output_dir to a path on another drive.',
             )
         cur_pos = fd.tell()
         line = fd.readline().strip()
@@ -459,15 +446,13 @@ def read_metric(path: str) -> List[int]:
             return list(dims_np.shape)
         else:
             raise ValueError(
-                'metric file {}, bad or missing'
-                ' entry "inv_metric"'.format(path)
+                'metric file {path}, bad or missing entry "inv_metric"'
             )
     else:
         dims = list(read_rdump_metric(path))
         if dims is None:
             raise ValueError(
-                'metric file {}, bad or missing'
-                ' entry "inv_metric"'.format(path)
+                'metric file {path}, bad or missing entry "inv_metric"'
             )
         return dims
 
@@ -482,7 +467,7 @@ def read_rdump_metric(path: str) -> List[int]:
         and isinstance(metric_dict['inv_metric'], np.ndarray)
     ):
         raise ValueError(
-            'metric file {}, bad or missing entry "inv_metric"'.format(path)
+            f'metric file {path}, bad or missing entry "inv_metric"'
         )
     return list(metric_dict['inv_metric'].shape)
 
@@ -547,5 +532,5 @@ def parse_rdump_value(rhs: str) -> Union[int, float, np.ndarray]:
         else:
             val = int(rhs)
     except TypeError as e:
-        raise ValueError('bad value in Rdump file: {}'.format(rhs)) from e
+        raise ValueError(f'bad value in Rdump file: {rhs}') from e
     return val

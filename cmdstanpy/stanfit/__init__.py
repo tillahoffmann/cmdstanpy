@@ -56,8 +56,8 @@ def from_csv(
         'variational',
     ]:
         raise ValueError(
-            'Bad method argument {}, must be one of: '
-            '"sample", "optimize", "variational"'.format(method)
+            f'Bad method argument {method}, must be one of: "sample", '
+            '"optimize", "variational"'
         )
 
     csvfiles = []
@@ -68,8 +68,8 @@ def from_csv(
         if splits[0] is not None:
             if not (os.path.exists(splits[0]) and os.path.isdir(splits[0])):
                 raise ValueError(
-                    'Invalid path specification, {} '
-                    ' unknown directory: {}'.format(path, splits[0])
+                    f'Invalid path specification, {path} unknown directory: '
+                    f'{splits[0]}'
                 )
         csvfiles = glob.glob(path)
     elif isinstance(path, (str, os.PathLike)):
@@ -80,17 +80,16 @@ def from_csv(
         elif os.path.exists(path):
             csvfiles.append(str(path))
         else:
-            raise ValueError('Invalid path specification: {}'.format(path))
+            raise ValueError(f'Invalid path specification: {path}')
     else:
-        raise ValueError('Invalid path specification: {}'.format(path))
+        raise ValueError(f'Invalid path specification: {path}')
 
     if len(csvfiles) == 0:
-        raise ValueError('No CSV files found in directory {}'.format(path))
+        raise ValueError(f'No CSV files found in directory {path}')
     for file in csvfiles:
         if not (os.path.exists(file) and os.path.splitext(file)[1] == ".csv"):
             raise ValueError(
-                'Bad CSV file path spec,'
-                ' includes non-csv file: {}'.format(file)
+                f'Bad CSV file path spec, includes non-csv file: {file}'
             )
 
     config_dict: Dict[str, Any] = {}
@@ -98,15 +97,13 @@ def from_csv(
         with open(csvfiles[0], 'r') as fd:
             scan_config(fd, config_dict, 0)
     except (IOError, OSError, PermissionError) as e:
-        raise ValueError('Cannot read CSV file: {}'.format(csvfiles[0])) from e
+        raise ValueError(f'Cannot read CSV file: {csvfiles[0]}') from e
     if 'model' not in config_dict or 'method' not in config_dict:
-        raise ValueError("File {} is not a Stan CSV file.".format(csvfiles[0]))
+        raise ValueError(f"File {csvfiles[0]} is not a Stan CSV file.")
     if method is not None and method != config_dict['method']:
         raise ValueError(
-            'Expecting Stan CSV output files from method {}, '
-            ' found outputs from method {}'.format(
-                method, config_dict['method']
-            )
+            f'Expecting Stan CSV output files from method {method}, found '
+            f'outputs from method {config_dict["method"]}'
         )
     try:
         if config_dict['method'] == 'sample':
@@ -164,8 +161,7 @@ def from_csv(
         elif config_dict['method'] == 'optimize':
             if 'algorithm' not in config_dict:
                 raise ValueError(
-                    "Cannot find optimization algorithm"
-                    " in file {}.".format(csvfiles[0])
+                    f"Cannot find optimization algorithm in file {csvfiles[0]}."
                 )
             optimize_args = OptimizeArgs(
                 algorithm=config_dict['algorithm'],
@@ -185,8 +181,7 @@ def from_csv(
         elif config_dict['method'] == 'variational':
             if 'algorithm' not in config_dict:
                 raise ValueError(
-                    "Cannot find variational algorithm"
-                    " in file {}.".format(csvfiles[0])
+                    f"Cannot find variational algorithm in file {csvfiles[0]}."
                 )
             variational_args = VariationalArgs(
                 algorithm=config_dict['algorithm'],
@@ -217,5 +212,5 @@ def from_csv(
             return None
     except (IOError, OSError, PermissionError) as e:
         raise ValueError(
-            'An error occurred processing the CSV files:\n\t{}'.format(str(e))
+            'An error occurred processing the CSV files:\n\t{e}'
         ) from e

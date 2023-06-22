@@ -642,14 +642,14 @@ def test_args_fitted_params() -> None:
     with pytest.raises(ValueError):
         args.validate(chains=1)
     csv_files = [
-        os.path.join(DATAFILES_PATH, 'runset-good', 'bern-{}.csv'.format(i + 1))
+        os.path.join(DATAFILES_PATH, 'runset-good', f'bern-{i + 1}.csv')
         for i in range(4)
     ]
     args = GenerateQuantitiesArgs(csv_files=csv_files)
     args.validate(chains=4)
     cmd = args.compose(idx=0, cmd=[])
     assert 'method=generate_quantities' in ' '.join(cmd)
-    assert 'fitted_params={}'.format(csv_files[0]) in ' '.join(cmd)
+    assert f'fitted_params={csv_files[0]}' in ' '.join(cmd)
 
 
 def test_args_variational() -> None:
